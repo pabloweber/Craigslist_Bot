@@ -2,6 +2,8 @@ import sys
 from selenium import webdriver
 import time
 
+# Creates a bot that scrapes craigslist's car+truck section and prints
+# ...results to console and cars.txt
 class CraigslistBot():
     def __init__(self):
         self.driver = webdriver.Chrome()
@@ -69,15 +71,15 @@ class CraigslistBot():
                     continue
 
                 # else, write to file
-                line = [name, " -> ", price_str, " | ", link, "\n"]
-                f.writelines(line)
+                file_fmt = '{0:<80}{1:>6} -> {2:<200}\n'
+                f.write(file_fmt.format(name, price_str, link))
                 
                 # print to console (left align name up to 80 chars, right align price up to 6)
                 dots = " "
                 for _ in range(79 - len(name)):
                     dots += "."
-                fmt = '{0:<80}{1:>6}'
-                print(fmt.format(name + dots, price_str))
+                console_fmt = '{0:<80}{1:>6}'
+                print(console_fmt.format(name + dots, price_str))
 
                 # increment counter
                 count += 1
@@ -107,11 +109,13 @@ class CraigslistBot():
         self.driver.quit()
 
 
-        
-
-
-# call function
+# create new bot
 bot = CraigslistBot()
-limit, make = bot.parse_input()
-bot.get_cars(limit, make)
-bot.close()
+try:
+    # get user input 
+    limit, make = bot.parse_input()
+    # scrape website
+    bot.get_cars(limit, make)
+finally:
+    # close browser window
+    bot.close()
