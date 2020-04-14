@@ -1,4 +1,5 @@
 cars.txt
 venv/bin 
 venv/include 
-venv/lib
+venv/lib.vscode
+.vscode
