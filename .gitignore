@@ -3,3 +3,4 @@ venv/bin
 venv/include 
 venv/lib.vscode
 .vscode
+secrets.py
