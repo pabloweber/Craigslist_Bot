@@ -4,6 +4,12 @@ from time import sleep
 import time
 from secrets import username, password
 
+# TODO:
+# implement price filtering (eg. 12345)
+# implement export to excel/csv file with xlwt
+# implement total time taken for both searches
+# implement total number of vehicles found
+
 # Creates a bot that scrapes craigslist's car+truck section and prints
 # ...results to console and cars.txt
 class CraigslistBot():
@@ -43,12 +49,11 @@ class CraigslistBot():
         # get start time for timer
         start_time = time.time()
 
-        # open file, begin output line
-        print("\n")
+        # begin output line
         hashes = ""
-        for x in range(int(((float(86) - len(" BEGIN LISTINGS ")) / 2))):
+        for x in range(int(((float(90) - len(" BEGIN CRAIGSLIST LISTINGS ")) / 2))):
             hashes += "#"
-        print(hashes + " BEGIN LISTINGS " + hashes + "\n")
+        print(hashes + " BEGIN CRAIGSLIST LISTINGS " + hashes + "\n")
 
         # keep track of price and number of cars
         is_under_price = True
@@ -66,6 +71,7 @@ class CraigslistBot():
                 dealership_filter_element = car.find_elements_by_class_name('result-hood')
                 if(len(dealership_filter_element) != 0): dealership_filter = dealership_filter_element[0].text
                 filter_words = ['finance', 'down', 'payment', 'payments', 'today', 'credit']
+                filter_price = ['1234', '1', '2345', '1111', '2222', '3333']
                 
                 # if reached price limit, done
                 if price > self.limit:
@@ -80,16 +86,21 @@ class CraigslistBot():
                 if any(ext in dealership_filter.lower() for ext in filter_words):
                     continue
 
+                # if placeholder price, skip
+                # if any(ext in str(price).lower() for ext in filter_price):
+                #     continue
+
                 # else, add to all_listings array
                 price_str = '$' + '{:,.0f}'.format(price)
                 tup = ((name, price_str, link), price)
                 self.all_listings.append(tup)
                 
-                # print to console (left align name up to 80 chars, right align price up to 6)
+                # print to console (left align name up to 80 chars, right align price to len of price)
                 dots = " "
-                for _ in range(79 - len(name)):
+                for _ in range(87 - (len(name) + len(price_str))):
                     dots += "."
-                console_fmt = '{0:<80}{1:>6}'
+                price_len = str(len(price_str) + 1)
+                console_fmt = '{0:<80}{1:>' + price_len + '}'
                 print(console_fmt.format(name + dots, price_str))
 
                 # increment counter
@@ -106,11 +117,11 @@ class CraigslistBot():
 
         # final output line
         hashes = ""
-        for x in range(int(((float(86) - len(" END LISTINGS ")) / 2))):
+        for x in range(int(((float(88) - len(" END CRAIGSLIST LISTINGS ")) / 2))):
             hashes += "#"
-        print("\n" + hashes + " END LISTINGS " + hashes + "\n")
+        print("\n" + hashes + " END CRAIGSLIST LISTINGS " + hashes + "\n")
         # write summary line to file and console, print time elapsed to 2 decimal places
-        print("\nFound " + str(count) + " vehicles in " + str(total_time)[:4] + "s.")
+        print("Found " + str(count) + " vehicles on Craigslist in " + str(total_time)[:4] + "s.")
 
     # get cars from Facebook Marketplace
     def get_fb(self):
@@ -135,6 +146,12 @@ class CraigslistBot():
         # get start time for timer
         start_time = time.time()
 
+        # begin output line
+        hashes = ""
+        for x in range(int(((float(88) - len(" BEGIN FACEBOOK LISTINGS ")) / 2))):
+            hashes += "#"
+        print(hashes + " BEGIN FACEBOOK LISTINGS " + hashes + "\n")
+
         # keep track of price, number of cars, and Facebook's dynamic array of cars
         is_under_price = True
         count = 0
@@ -158,6 +175,7 @@ class CraigslistBot():
                 price = int(price_str[1:].replace(',', ''))
                 name = car.find_element_by_id('marketplace-modal-dialog-title').get_attribute('title')
                 link = car.get_attribute('href')
+                filter_price = ['1234', '1', '2345', '1111', '2222', '3333']
                 
                 # if reached price limit, done
                 if price > self.limit:
@@ -168,15 +186,20 @@ class CraigslistBot():
                 if self.make != None and self.make.lower() not in name.lower():
                     continue
 
+                # if placeholder price, skip
+                # if any(ext in str(price).lower() for ext in filter_price):
+                #     continue
+
                 # add to all_listings array for file output
                 tup = ((name, price_str, link), price)
                 self.all_listings.append(tup)
                 
                 # print to console (left align name up to 80 chars, right align price up to 6)
                 dots = " "
-                for _ in range(79 - len(name)):
+                for _ in range(87 - (len(name) + len(price_str))):
                     dots += "."
-                console_fmt = '{0:<80}{1:>6}'
+                price_len = str(len(price_str) + 1)
+                console_fmt = '{0:<80}{1:>' + price_len + '}'
                 print(console_fmt.format(name + dots, price_str))
 
                 # increment counter
@@ -192,11 +215,11 @@ class CraigslistBot():
 
         # final output line
         hashes = ""
-        for x in range(int(((float(86) - len(" END LISTINGS ")) / 2))):
+        for x in range(int(((float(88) - len(" END FACEBOOK LISTINGS ")) / 2))):
             hashes += "#"
-        print("\n" + hashes + " END LISTINGS " + hashes + "\n")
+        print("\n" + hashes + " END FACEBOOK LISTINGS " + hashes + "\n")
         # write summary line to console, print time elapsed to 2 decimal places
-        print("\nFound " + str(count) + " vehicles in " + str(total_time)[:4] + "s.")
+        print("Found " + str(count) + " vehicles on FaceBook in " + str(total_time)[:4] + "s.")
 
     # sort all listings by price and put into file
     def sort_and_output(self):
@@ -223,15 +246,17 @@ class CraigslistBot():
         self.cl_driver.quit()
         self.fb_driver.quit()
 
-
 # create new bot
 bot = CraigslistBot()
 try:
     # get user input 
     bot.parse_input()
-    # scrape website
+
+    # scrape website with multiprocessing (avg. of 10s saved)
     bot.get_cars()
     bot.get_fb()
+
+    # output file creation
     bot.sort_and_output()
 finally:
     # close browser window
