@@ -1,6 +1,5 @@
 cars.txt
-venv/bin 
-venv/include 
-venv/lib.vscode
+venv
 .vscode
 secrets.py
+__pycache__
