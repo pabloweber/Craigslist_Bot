@@ -4,11 +4,13 @@ from time import sleep
 import time
 from secrets import username, password
 
-# TODO:
+# ! TODO:
 # implement price filtering (eg. 12345)
 # implement export to excel/csv file with xlwt
 # implement total time taken for both searches
 # implement total number of vehicles found
+# implement KBB value for each car
+# implement opening all cars into tabs as an option
 
 # Creates a bot that scrapes craigslist's car+truck section and prints
 # ...results to console and cars.txt
@@ -18,8 +20,8 @@ class CraigslistBot():
         self.make = ''
         self.cl_driver = webdriver.Chrome()
         self.fb_driver = webdriver.Chrome()
-        self.cl_link = 'https://newyork.craigslist.org/search/wch/cta?sort=priceasc&'
-        self.fb_link = 'https://www.facebook.com/marketplace/106310892736384/vehicles/?sort=PRICE_ASCEND'
+        self.cl_link = 'https://newyork.craigslist.org/search/wch/cta?sort=priceasc&auto_transmission=1'
+        self.fb_link = 'https://www.facebook.com/marketplace/vehicles/?vehicleIsManualTransmission=1&sort=PRICE_ASCEND'
         self.cl_time = 0
         self.fb_time = 0
         self.all_listings = []
@@ -83,8 +85,9 @@ class CraigslistBot():
                     continue
 
                 # if dealership, skip
-                if any(ext in dealership_filter.lower() for ext in filter_words):
-                    continue
+                if len(dealership_filter_element) != 0:
+                    if any(ext in dealership_filter.lower() for ext in filter_words):
+                        continue
 
                 # if placeholder price, skip
                 # if any(ext in str(price).lower() for ext in filter_price):
